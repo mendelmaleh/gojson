@@ -265,13 +265,22 @@ func convertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{
 	return res
 }
 
-func subName(sub, structName string, subStructMap map[string]string) string {
+func subName(sub, key string, subStructMap map[string]string) string {
 	if subStructMap != nil {
 		if val, ok := subStructMap[sub]; ok {
 			return val
 		}
 
-		name := fmt.Sprintf("%v_sub%v", structName, len(subStructMap)+1)
+		name := strings.Title(key)
+
+		// ensure that name isn't already taken, if it's taken use something guaranteed to be unique
+		for _, v := range subStructMap {
+			if v == name {
+				name = fmt.Sprintf("%v_sub%v", name, len(subStructMap)+1)
+				break
+			}
+		}
+
 		subStructMap[sub] = name
 
 		return name
@@ -308,15 +317,15 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 				}
 
 				if sub != "" {
-					valueType = "[]" + subName(sub, structName, subStructMap)
+					valueType = "[]" + subName(sub, key, subStructMap)
 				}
 			}
 		case map[interface{}]interface{}:
 			sub := generateTypes(convertKeysToStrings(value), structName, tags, depth+1, subStructMap, convertFloats) + "}"
-			valueType = subName(sub, structName, subStructMap)
+			valueType = subName(sub, key, subStructMap)
 		case map[string]interface{}:
 			sub := generateTypes(value, structName, tags, depth+1, subStructMap, convertFloats) + "}"
-			valueType = subName(sub, structName, subStructMap)
+			valueType = subName(sub, key, subStructMap)
 		}
 
 		fieldName := FmtFieldName(key)
