@@ -294,9 +294,9 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 		value := obj[key]
 		valueType := typeForValue(value, structName, tags, subStructMap, convertFloats)
 
-		//value = mergeElements(value)
+		// value = mergeElements(value)
 
-		//If a nested value, recurse
+		// If a nested value, recurse
 		switch value := value.(type) {
 		case []interface{}:
 			if len(value) > 0 {
@@ -443,7 +443,6 @@ func lintFieldName(name string) string {
 			// All the common initialisms are ASCII,
 			// so we can replace the bytes exactly.
 			copy(runes[w:], []rune(u))
-
 		} else if strings.ToLower(word) == word {
 			// already all lowercase, and not the first word, so uppercase the first character.
 			runes[w] = unicode.ToUpper(runes[w])
@@ -455,7 +454,7 @@ func lintFieldName(name string) string {
 
 // generate an appropriate struct type entry
 func typeForValue(value interface{}, structName string, tags []string, subStructMap map[string]string, convertFloats bool) string {
-	//Check if this is an array
+	// Check if this is an array
 	if objects, ok := value.([]interface{}); ok {
 		types := make(map[reflect.Type]bool, 0)
 		for _, o := range objects {
@@ -496,7 +495,6 @@ func stringifyFirstChar(str string) string {
 	first := str[:1]
 
 	i, err := strconv.ParseInt(first, 10, 8)
-
 	if err != nil {
 		return str
 	}
