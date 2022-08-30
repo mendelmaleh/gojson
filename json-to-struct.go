@@ -265,6 +265,21 @@ func convertKeysToStrings(obj map[interface{}]interface{}) map[string]interface{
 	return res
 }
 
+func subName(sub, structName string, subStructMap map[string]string) string {
+	if subStructMap != nil {
+		if val, ok := subStructMap[sub]; ok {
+			return val
+		}
+
+		name := fmt.Sprintf("%v_sub%v", structName, len(subStructMap)+1)
+		subStructMap[sub] = name
+
+		return name
+	}
+
+	return sub
+}
+
 // Generate go struct entries for a map[string]interface{} structure
 func generateTypes(obj map[string]interface{}, structName string, tags []string, depth int, subStructMap map[string]string, convertFloats bool) string {
 	structure := "struct {"
@@ -293,50 +308,15 @@ func generateTypes(obj map[string]interface{}, structName string, tags []string,
 				}
 
 				if sub != "" {
-					subName := sub
-
-					if subStructMap != nil {
-						if val, ok := subStructMap[sub]; ok {
-							subName = val
-						} else {
-							subName = fmt.Sprintf("%v_sub%v", structName, len(subStructMap)+1)
-
-							subStructMap[sub] = subName
-						}
-					}
-
-					valueType = "[]" + subName
+					valueType = "[]" + subName(sub, structName, subStructMap)
 				}
 			}
 		case map[interface{}]interface{}:
 			sub := generateTypes(convertKeysToStrings(value), structName, tags, depth+1, subStructMap, convertFloats) + "}"
-			subName := sub
-
-			if subStructMap != nil {
-				if val, ok := subStructMap[sub]; ok {
-					subName = val
-				} else {
-					subName = fmt.Sprintf("%v_sub%v", structName, len(subStructMap)+1)
-
-					subStructMap[sub] = subName
-				}
-			}
-			valueType = subName
+			valueType = subName(sub, structName, subStructMap)
 		case map[string]interface{}:
 			sub := generateTypes(value, structName, tags, depth+1, subStructMap, convertFloats) + "}"
-			subName := sub
-
-			if subStructMap != nil {
-				if val, ok := subStructMap[sub]; ok {
-					subName = val
-				} else {
-					subName = fmt.Sprintf("%v_sub%v", structName, len(subStructMap)+1)
-
-					subStructMap[sub] = subName
-				}
-			}
-
-			valueType = subName
+			valueType = subName(sub, structName, subStructMap)
 		}
 
 		fieldName := FmtFieldName(key)
